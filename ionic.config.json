@@ -1,5 +1,7 @@
 {
   "name": "eye-gym",
-  "integrations": {},
+  "integrations": {
+    "capacitor": {}
+  },
   "type": "vue-vite"
 }
