@@ -1,0 +1,17 @@
+# Build outputs
+dist
+build
+android
+resources
+
+# Dependencies
+node_modules
+
+# IDE
+.vscode
+.idea
+
+# Misc
+*.log
+.DS_Store
+coverage

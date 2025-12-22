@@ -1,30 +1,83 @@
-import { createRouter, createWebHistory } from "@ionic/vue-router";
-import { RouteRecordRaw } from "vue-router";
-import HomePage from "../views/HomePage.vue";
-import SessionPage from "@/views/SessionPage.vue";
-import SettingPage from "@/views/SettingPage.vue";
+import { createRouter, createWebHistory } from '@ionic/vue-router'
+import { RouteRecordRaw } from 'vue-router'
+import { AnimationBuilder, createAnimation } from '@ionic/vue'
+import HomePage from '../views/HomePage.vue'
+
+const createForwardAnimation: AnimationBuilder = (baseEl, opts) => {
+  const rootTransition = createAnimation().duration(250).easing('cubic-bezier(0.32, 0.72, 0, 1)')
+
+  const enteringAnimation = createAnimation()
+    .addElement(opts.enteringEl)
+    .fromTo('transform', 'translateX(100%)', 'translateX(0)')
+    .fromTo('opacity', 0.8, 1)
+
+  const leavingAnimation = createAnimation()
+    .addElement(opts.leavingEl)
+    .fromTo('transform', 'translateX(0)', 'translateX(-20%)')
+    .fromTo('opacity', 1, 0.8)
+
+  return rootTransition.addAnimation([enteringAnimation, leavingAnimation])
+}
+
+const createBackwardAnimation: AnimationBuilder = (baseEl, opts) => {
+  const rootTransition = createAnimation().duration(250).easing('cubic-bezier(0.32, 0.72, 0, 1)')
+
+  const enteringAnimation = createAnimation()
+    .addElement(opts.enteringEl)
+    .fromTo('transform', 'translateX(-20%)', 'translateX(0)')
+    .fromTo('opacity', 0.8, 1)
+
+  const leavingAnimation = createAnimation()
+    .addElement(opts.leavingEl)
+    .fromTo('transform', 'translateX(0)', 'translateX(100%)')
+    .fromTo('opacity', 1, 0.8)
+
+  return rootTransition.addAnimation([enteringAnimation, leavingAnimation])
+}
 
 const routes: Array<RouteRecordRaw> = [
-   {
-      path: "/",
-      name: "Index",
-      component: HomePage,
-   },
-   {
-      path: "/session",
-      name: "Session",
-      component: SessionPage,
-   },
-   {
-      path: "/settings",
-      name: "Settings",
-      component: SettingPage,
-   },
-];
+  {
+    path: '/',
+    name: 'index',
+    component: HomePage,
+  },
+  {
+    path: '/session',
+    name: 'session',
+    component: () => import('@/views/SessionPage.vue'),
+  },
+  {
+    path: '/settings',
+    name: 'settings',
+    component: () => import('@/views/SettingPage.vue'),
+  },
+  {
+    path: '/history',
+    name: 'history',
+    component: () => import('@/views/HistoryPage.vue'),
+  },
+]
 
 const router = createRouter({
-   history: createWebHistory(import.meta.env.BASE_URL),
-   routes,
-});
+  history: createWebHistory(import.meta.env.BASE_URL),
+  routes,
+})
 
-export default router;
+// Додаємо анімації до навігації
+router.beforeEach((to, from, next) => {
+  const toDepth = to.path.split('/').length
+  const fromDepth = from.path.split('/').length
+
+  if (!from.name) {
+    // Перший перехід - без анімації
+    to.meta.transition = undefined
+  } else if (toDepth < fromDepth) {
+    to.meta.transition = createBackwardAnimation
+  } else {
+    to.meta.transition = createForwardAnimation
+  }
+
+  next()
+})
+
+export default router
