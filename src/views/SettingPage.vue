@@ -68,7 +68,6 @@ const saveReminders = async () => {
 }
 
 onMounted(async () => {
-  // Завантажити збережені налаштування
   voiceRate.value = await getVoiceRate()
   selectedTheme.value = await getTheme()
 
@@ -129,8 +128,27 @@ const changeReminderTime = async (idx: number, value: string) => {
       </ion-toolbar>
     </ion-header>
     <ion-content class="ion-padding">
-      <ion-list>
-        <!-- Швидкість голосу -->
+      <ion-list class="settings-list">
+        <ion-list-header>
+          <ion-label>Вигляд</ion-label>
+        </ion-list-header>
+
+        <ion-item>
+          <ion-label>Тема</ion-label>
+          <ion-select
+            v-model="selectedTheme"
+            interface="action-sheet"
+            @ionChange="changeTheme"
+            slot="end"
+          >
+            <ion-select-option value="system">Системна</ion-select-option>
+            <ion-select-option value="light">Світла</ion-select-option>
+            <ion-select-option value="dark">Темна</ion-select-option>
+          </ion-select>
+        </ion-item>
+      </ion-list>
+
+      <ion-list class="settings-list">
         <ion-list-header>
           <ion-label>Голосові налаштування</ion-label>
         </ion-list-header>
@@ -157,33 +175,21 @@ const changeReminderTime = async (idx: number, value: string) => {
         </ion-item>
 
         <ion-item>
-          <ion-button expand="block" @click="testVoice"> Тестувати голос </ion-button>
+          <ion-button @click="testVoice"> Тестувати голос </ion-button>
         </ion-item>
+      </ion-list>
 
-        <!-- Тема -->
-        <ion-list-header>
-          <ion-label>Вигляд</ion-label>
-        </ion-list-header>
-
-        <ion-item>
-          <ion-label>Тема</ion-label>
-          <ion-select v-model="selectedTheme" interface="action-sheet" @ionChange="changeTheme">
-            <ion-select-option value="system">Системна</ion-select-option>
-            <ion-select-option value="light">Світла</ion-select-option>
-            <ion-select-option value="dark">Темна</ion-select-option>
-          </ion-select>
-        </ion-item>
-
+      <ion-list class="settings-list">
         <ion-list-header>
           <ion-label>Нагадування (Android)</ion-label>
         </ion-list-header>
 
-        <ion-item>
+        <ion-item class="reminder-description">
           <ion-label>
             <h2>Нагадування</h2>
             <p>Сповіщення на телефоні у вибраний час</p>
           </ion-label>
-          <ion-toggle v-model="remindersEnabled" @ionChange="changeRemindersEnabled"></ion-toggle>
+          <ion-toggle slot="end" v-model="remindersEnabled" @ionChange="changeRemindersEnabled" />
         </ion-item>
 
         <ion-item :disabled="!remindersEnabled">
@@ -191,6 +197,7 @@ const changeReminderTime = async (idx: number, value: string) => {
           <ion-select
             v-model="remindersTimesPerDay"
             interface="action-sheet"
+            slot="end"
             @ionChange="changeRemindersTimesPerDay"
           >
             <ion-select-option :value="2">2</ion-select-option>
@@ -204,7 +211,7 @@ const changeReminderTime = async (idx: number, value: string) => {
           :key="idx"
           :disabled="!remindersEnabled || idx >= remindersTimesPerDay"
         >
-          <ion-label>Час #{{ idx + 1 }}</ion-label>
+          <ion-label class="reminder-time-label">Час № {{ idx + 1 }}:</ion-label>
           <ion-input
             :value="t"
             type="time"
@@ -212,8 +219,9 @@ const changeReminderTime = async (idx: number, value: string) => {
             @ionChange="changeReminderTime(idx, (($event as any).detail?.value as string) || t)"
           ></ion-input>
         </ion-item>
+      </ion-list>
 
-        <!-- Інформація -->
+      <ion-list class="settings-list">
         <ion-list-header>
           <ion-label>Про застосунок</ion-label>
         </ion-list-header>
@@ -233,7 +241,6 @@ const changeReminderTime = async (idx: number, value: string) => {
         </ion-item>
       </ion-list>
 
-      <!-- Кнопка скидання -->
       <div class="reset-section">
         <ion-button expand="block" color="danger" fill="outline" @click="resetSettings">
           Скинути налаштування
@@ -243,6 +250,10 @@ const changeReminderTime = async (idx: number, value: string) => {
   </ion-page>
 </template>
 <style scoped>
+.settings-list {
+  margin-bottom: 5px;
+}
+
 ion-list {
   margin-bottom: 20px;
 }
@@ -252,7 +263,19 @@ ion-range {
 }
 
 .reset-section {
-  margin-top: 40px;
+  margin-top: 20px;
   padding: 0 16px;
+}
+
+ion-list-header {
+  font-size: 18px;
+}
+.reminder-time-label {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.reminder-description ion-label p {
+  margin-top: 4px;
 }
 </style>

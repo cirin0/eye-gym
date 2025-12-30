@@ -9,7 +9,6 @@ import {
   IonHeader,
   IonToolbar,
   IonTitle,
-  IonButtons,
   IonButton,
   IonContent,
   IonProgressBar,
@@ -25,7 +24,8 @@ const isRunning = ref(false)
 const isPaused = ref(false)
 const isCompleted = ref(false)
 const timeLeft = ref(0)
-let exerciseTimer: NodeJS.Timeout | null = null
+let exerciseTimeout: NodeJS.Timeout | null = null
+let intervalTimer: NodeJS.Timeout | null = null
 const sessionStartedAt = ref<number>(Date.now())
 const historyWritten = ref(false)
 
@@ -69,11 +69,7 @@ const playBeep = async (durationMs = 120, frequencyHz = 880) => {
 }
 
 const vibrateTransition = async () => {
-  try {
-    await Haptics.impact({ style: ImpactStyle.Medium })
-  } catch {
-    // noop
-  }
+  await Haptics.impact({ style: ImpactStyle.Heavy })
 }
 
 onMounted(async () => {
@@ -90,10 +86,13 @@ onBeforeUnmount(() => {
 })
 
 const clearTimer = () => {
-  if (exerciseTimer) {
-    clearTimeout(exerciseTimer)
-    clearInterval(exerciseTimer)
-    exerciseTimer = null
+  if (exerciseTimeout) {
+    clearTimeout(exerciseTimeout)
+    exerciseTimeout = null
+  }
+  if (intervalTimer) {
+    clearInterval(intervalTimer)
+    intervalTimer = null
   }
 }
 
@@ -108,14 +107,14 @@ const startExercise = async () => {
     runTimer()
   } else {
     const estimatedTime = (currentExercise.value.reps || 10) * 1000
-    exerciseTimer = setTimeout(() => {
+    exerciseTimeout = setTimeout(() => {
       nextExercise()
     }, estimatedTime)
   }
 }
 
 const runTimer = () => {
-  exerciseTimer = setInterval(() => {
+  intervalTimer = setInterval(() => {
     if (!isPaused.value) {
       timeLeft.value--
 
@@ -160,7 +159,7 @@ const nextExercise = async () => {
     await speak('Тренування завершено. Вітаємо!')
     setTimeout(() => {
       router.push({ name: 'index' })
-    }, 3000)
+    }, 1000)
   }
 }
 
@@ -188,7 +187,7 @@ const handleStop = async () => {
           clearTimer()
           stopSpeak()
           isRunning.value = false
-          isPaused.value = true
+          isPaused.value = false
 
           if (!historyWritten.value) {
             historyWritten.value = true
@@ -206,10 +205,8 @@ const handleStop = async () => {
           }
 
           setTimeout(() => {
-            router.replace({ name: 'Index' })
+            router.replace({ name: 'index' })
           }, 200)
-
-          return true // Дозволяємо alert закритись
         },
       },
     ],
@@ -221,9 +218,6 @@ const handleStop = async () => {
   <ion-page>
     <ion-header>
       <ion-toolbar>
-        <ion-buttons slot="start">
-          <ion-button @click="handleStop">Стоп</ion-button>
-        </ion-buttons>
         <ion-title>Тренування</ion-title>
       </ion-toolbar>
     </ion-header>
@@ -266,8 +260,6 @@ const handleStop = async () => {
 
         <div class="status-info">
           <p v-if="isCompleted" class="success-message">✓ Тренування завершено!</p>
-          <p v-else-if="isPaused" class="pause-message">⏸ Пауза</p>
-          <p v-else class="running-message">► Виконання вправи...</p>
         </div>
       </div>
     </ion-content>
@@ -275,10 +267,10 @@ const handleStop = async () => {
 </template>
 <style scoped>
 .session-content {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  min-height: 100vh;
+  --padding-top: 16px;
+  --padding-bottom: 16px;
+  --padding-start: 16px;
+  --padding-end: 16px;
 }
 
 .session-container {
@@ -286,19 +278,26 @@ const handleStop = async () => {
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  min-height: 100%;
+  height: 100%;
+  padding: env(safe-area-inset-top, 0) 0 env(safe-area-inset-bottom, 0) 0;
 }
 
 .progress-info {
   width: 100%;
-  margin-bottom: 40px;
+  padding-top: 8px;
 }
 
 .progress-text {
   font-size: 14px;
   color: var(--ion-color-medium);
-  margin-bottom: 10px;
+  margin: 0 0 12px 0;
   text-align: center;
+}
+
+ion-progress-bar {
+  --progress-background: var(--ion-color-primary);
+  height: 6px;
+  border-radius: 3px;
 }
 
 .exercise-display {
@@ -308,28 +307,28 @@ const handleStop = async () => {
   align-items: center;
   justify-content: center;
   width: 100%;
-  margin: 40px 0;
+  padding: 16px 0;
 }
 
 .exercise-name {
-  font-size: 36px;
+  font-size: 28px;
   font-weight: 600;
   text-align: center;
   color: var(--ion-text-color);
-  margin-bottom: 40px;
+  margin: 0 0 24px 0;
   line-height: 1.3;
+  padding: 0 8px;
 }
 
 .timer-display {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 40px 0;
 }
 
 .timer-circle {
-  width: 150px;
-  height: 150px;
+  width: 140px;
+  height: 140px;
   border-radius: 50%;
   background: var(--ion-color-primary);
   display: flex;
@@ -337,27 +336,29 @@ const handleStop = async () => {
   align-items: center;
   justify-content: center;
   color: white;
+  box-shadow: 0 4px 16px rgba(var(--ion-color-primary-rgb), 0.3);
 }
 
 .timer-text {
-  font-size: 64px;
+  font-size: 52px;
   font-weight: 700;
+  line-height: 1;
 }
 
 .timer-unit {
-  font-size: 16px;
-  margin-top: 5px;
+  font-size: 14px;
+  margin-top: 4px;
+  opacity: 0.9;
 }
 
 .reps-display {
   background: var(--ion-color-light);
-  padding: 30px;
+  padding: 24px 32px;
   border-radius: 12px;
-  margin: 40px 0;
 }
 
 .reps-text {
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 600;
   margin: 0;
   color: var(--ion-color-primary);
@@ -365,47 +366,52 @@ const handleStop = async () => {
 
 .controls {
   width: 100%;
-  margin-bottom: 40px;
+  padding-bottom: 8px;
 }
 
-ion-button {
-  margin: 10px 0;
+.controls ion-button {
+  margin: 8px 0;
+  --border-radius: 12px;
+  height: 52px;
+  font-size: 16px;
+  font-weight: 600;
 }
 
 .status-info {
   text-align: center;
-  margin-bottom: 20px;
+  min-height: 28px;
+  padding-bottom: 8px;
 }
 
 .success-message {
-  font-size: 20px;
+  font-size: 18px;
   color: var(--ion-color-success);
   font-weight: 600;
+  margin: 0;
 }
 
-.pause-message {
-  font-size: 18px;
-  color: var(--ion-color-warning);
-  font-weight: 500;
-}
-
-.running-message {
-  font-size: 16px;
-  color: var(--ion-color-medium);
-}
-
-@media (max-width: 600px) {
+@media (min-width: 400px) {
   .exercise-name {
-    font-size: 28px;
+    font-size: 32px;
   }
 
   .timer-circle {
-    width: 120px;
-    height: 120px;
+    width: 160px;
+    height: 160px;
   }
 
   .timer-text {
-    font-size: 48px;
+    font-size: 60px;
+  }
+}
+
+@media (min-height: 700px) {
+  .exercise-display {
+    padding: 24px 0;
+  }
+
+  .exercise-name {
+    margin-bottom: 32px;
   }
 }
 </style>
