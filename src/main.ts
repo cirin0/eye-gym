@@ -36,6 +36,28 @@ import './theme/variables.css'
 
 const app = createApp(App).use(IonicVue).use(router)
 
+app.config.errorHandler = (err, instance, info) => {
+  console.error('Глобальна помилка:', err)
+  console.error('Інформація:', info)
+
+  const errorMessage = err instanceof Error ? err.message : 'Невідома помилка'
+
+  setTimeout(() => {
+    alert(`Виникла помилка: ${errorMessage}\n\nБудь ласка, спробуйте ще раз.`)
+  }, 100)
+}
+
+window.addEventListener('unhandledrejection', (event) => {
+  console.error('Необроблене відхилення промісу:', event.reason)
+  event.preventDefault()
+
+  const errorMessage =
+    event.reason instanceof Error ? event.reason.message : 'Помилка виконання операції'
+  setTimeout(() => {
+    alert(`Виникла помилка: ${errorMessage}\n\nБудь ласка, спробуйте ще раз.`)
+  }, 100)
+})
+
 router.isReady().then(() => {
   app.mount('#app')
 })

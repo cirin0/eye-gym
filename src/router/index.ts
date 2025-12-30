@@ -4,33 +4,27 @@ import { AnimationBuilder, createAnimation } from '@ionic/vue'
 import HomePage from '../views/HomePage.vue'
 
 const createForwardAnimation: AnimationBuilder = (baseEl, opts) => {
-  const rootTransition = createAnimation().duration(250).easing('cubic-bezier(0.32, 0.72, 0, 1)')
+  const rootTransition = createAnimation().duration(180).easing('ease-out')
 
   const enteringAnimation = createAnimation()
     .addElement(opts.enteringEl)
-    .fromTo('transform', 'translateX(100%)', 'translateX(0)')
-    .fromTo('opacity', 0.8, 1)
+    .fromTo('transform', 'translateX(30%)', 'translateX(0)')
+    .fromTo('opacity', 0, 1)
 
-  const leavingAnimation = createAnimation()
-    .addElement(opts.leavingEl)
-    .fromTo('transform', 'translateX(0)', 'translateX(-20%)')
-    .fromTo('opacity', 1, 0.8)
+  const leavingAnimation = createAnimation().addElement(opts.leavingEl).fromTo('opacity', 1, 0)
 
   return rootTransition.addAnimation([enteringAnimation, leavingAnimation])
 }
 
 const createBackwardAnimation: AnimationBuilder = (baseEl, opts) => {
-  const rootTransition = createAnimation().duration(250).easing('cubic-bezier(0.32, 0.72, 0, 1)')
+  const rootTransition = createAnimation().duration(180).easing('ease-out')
 
-  const enteringAnimation = createAnimation()
-    .addElement(opts.enteringEl)
-    .fromTo('transform', 'translateX(-20%)', 'translateX(0)')
-    .fromTo('opacity', 0.8, 1)
+  const enteringAnimation = createAnimation().addElement(opts.enteringEl).fromTo('opacity', 0, 1)
 
   const leavingAnimation = createAnimation()
     .addElement(opts.leavingEl)
-    .fromTo('transform', 'translateX(0)', 'translateX(100%)')
-    .fromTo('opacity', 1, 0.8)
+    .fromTo('transform', 'translateX(0)', 'translateX(30%)')
+    .fromTo('opacity', 1, 0)
 
   return rootTransition.addAnimation([enteringAnimation, leavingAnimation])
 }
@@ -63,13 +57,11 @@ const router = createRouter({
   routes,
 })
 
-// Додаємо анімації до навігації
 router.beforeEach((to, from, next) => {
   const toDepth = to.path.split('/').length
   const fromDepth = from.path.split('/').length
 
   if (!from.name) {
-    // Перший перехід - без анімації
     to.meta.transition = undefined
   } else if (toDepth < fromDepth) {
     to.meta.transition = createBackwardAnimation
