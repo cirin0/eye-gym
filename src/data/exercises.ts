@@ -53,7 +53,7 @@ export const EXERCISES: EyeExercise[] = [
     id: 'blink',
     kind: 'static',
     name: 'Моргання',
-    ttsCommand: 'Поморгайте вільно протягом десяти секунд.',
+    ttsCommand: "Поморгайте вільно протягом п'яти секунд.",
     seconds: 5,
   },
   {
@@ -67,7 +67,7 @@ export const EXERCISES: EyeExercise[] = [
     id: 'blink',
     kind: 'static',
     name: 'Моргання',
-    ttsCommand: 'Поморгайте вільно протягом десяти секунд.',
+    ttsCommand: "Поморгайте вільно протягом п'яти секунд.",
     seconds: 5,
   },
   {
@@ -81,7 +81,7 @@ export const EXERCISES: EyeExercise[] = [
     id: 'blink',
     kind: 'static',
     name: 'Моргання',
-    ttsCommand: 'Поморгайте вільно протягом десяти секунд.',
+    ttsCommand: "Поморгайте вільно протягом п'яти секунд.",
     seconds: 5,
   },
   {
@@ -95,7 +95,7 @@ export const EXERCISES: EyeExercise[] = [
     id: 'blink',
     kind: 'static',
     name: 'Моргання',
-    ttsCommand: 'Поморгайте вільно протягом десяти секунд.',
+    ttsCommand: "Поморгайте вільно протягом п'яти секунд.",
     seconds: 5,
   },
   {
@@ -110,7 +110,7 @@ export const EXERCISES: EyeExercise[] = [
     id: 'blink',
     kind: 'static',
     name: 'Моргання',
-    ttsCommand: 'Поморгайте вільно протягом десяти секунд.',
+    ttsCommand: "Поморгайте вільно протягом п'яти секунд.",
     seconds: 5,
   },
   {
@@ -124,7 +124,7 @@ export const EXERCISES: EyeExercise[] = [
     id: 'blink',
     kind: 'static',
     name: 'Моргання',
-    ttsCommand: 'Поморгайте вільно протягом десяти секунд.',
+    ttsCommand: "Поморгайте вільно протягом п'яти секунд.",
     seconds: 5,
   },
   {
@@ -138,7 +138,7 @@ export const EXERCISES: EyeExercise[] = [
     id: 'blink',
     kind: 'static',
     name: 'Моргання',
-    ttsCommand: 'Поморгайте вільно протягом десяти секунд.',
+    ttsCommand: "Поморгайте вільно протягом п'яти секунд.",
     seconds: 5,
   },
   {
