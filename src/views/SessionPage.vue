@@ -4,6 +4,7 @@ import { getVoiceRate } from '@/services/settings'
 import { speak, stopSpeak } from '@/services/tts'
 import { Haptics, ImpactStyle } from '@capacitor/haptics'
 import { addTrainingHistoryEntry } from '@/services/history'
+import { KeepAwake } from '@capacitor-community/keep-awake'
 import {
   IonPage,
   IonHeader,
@@ -73,6 +74,11 @@ const vibrateTransition = async () => {
 }
 
 onMounted(async () => {
+  try {
+    await KeepAwake.keepAwake()
+  } catch (e) {
+    console.error('KeepAwake error:', e)
+  }
   voiceRate.value = await getVoiceRate()
   sessionStartedAt.value = Date.now()
   historyWritten.value = false
@@ -80,9 +86,14 @@ onMounted(async () => {
   await startExercise()
 })
 
-onBeforeUnmount(() => {
+onBeforeUnmount(async () => {
   clearTimer()
   stopSpeak()
+  try {
+    await KeepAwake.allowSleep()
+  } catch (e) {
+    console.error('AllowSleep error:', e)
+  }
 })
 
 const clearTimer = () => {
@@ -156,6 +167,12 @@ const nextExercise = async () => {
       })
     }
 
+    try {
+      await KeepAwake.allowSleep()
+    } catch (e) {
+      console.error('AllowSleep error:', e)
+    }
+
     await speak('Тренування завершено. Вітаємо!')
     setTimeout(() => {
       router.push({ name: 'index' })
@@ -183,7 +200,7 @@ const handleStop = async () => {
       },
       {
         text: 'Так',
-        handler: () => {
+        handler: async () => {
           clearTimer()
           stopSpeak()
           isRunning.value = false
@@ -202,6 +219,12 @@ const handleStop = async () => {
               completedExercises: Math.min(totalExercises, Math.max(0, currentIndex.value)),
               status: 'stopped',
             })
+          }
+
+          try {
+            await KeepAwake.allowSleep()
+          } catch (e) {
+            console.error('AllowSleep error:', e)
           }
 
           setTimeout(() => {
